@@ -22,7 +22,7 @@ def test_mapping_auth_limit_cache_and_raw(store,contract):
     rows,raw,stamp,cached=c.search('bars',20)
     assert rows[0]['title']=='A' and raw==payload and not cached
     assert session.request.call_args.kwargs['json']=={'q':'bars','n':20}
-    assert session.request.call_args.kwargs['headers']=={'Authorization':'Bearer test'}
+    assert session.request.call_args.kwargs['headers']=={'Authorization':'Bearer test','Content-Type':'application/json'}
     assert c.search('bars')[3] is True and session.request.call_count==1
     assert store.rows('SELECT raw FROM cache')[0]['raw']==json.dumps(payload)
     assert len(store.rows('SELECT * FROM requests'))==1

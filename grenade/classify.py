@@ -32,7 +32,7 @@ def normalize(row,rank,brands,config):
     if owned and owned not in detected: detected.append(owned)
     return {'rank':rank,'title':row.get('title') or '', 'url':row['url'], 'domain':domain(row['url']),
         'snippet':row.get('snippet') or '', 'summary':row.get('summary') or '',
-        'rerank_score':row.get('rerank_score'), 'authority_tier':row.get('authority_tier') or 'Unknown / not supplied',
+        'rerank_score':row.get('rerank_score'), 'authority_tier':('Unknown (-1)' if row.get('authority_tier')==-1 else 'Unknown / not supplied' if row.get('authority_tier') is None else row['authority_tier']),
         'publication_date':row.get('publication_date'), 'brands':detected,'official_brand':owned,
         'classification':classification}
 

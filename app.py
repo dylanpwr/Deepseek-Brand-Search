@@ -3,29 +3,61 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-from dotenv import load_dotenv
+from grenade.connection import load_settings, check_key, project_path
 from grenade.storage import Store
 from grenade.analysis import frames,visibility,grouped_visibility,gaps,fetched_pages,compare,WEIGHTS
-from grenade.runner import load_queries,ROOT,plan,run_audit
+from grenade.runner import load_queries,ROOT,plan,run_audit,probe_plan,probe_result
 
-load_dotenv()
+load_settings()
 st.set_page_config(page_title='Grenade | Search Intelligence',page_icon='🟢',layout='wide')
 st.markdown("""<style>.stApp {background:#101414} h1,h2,h3 {letter-spacing:-.04em} [data-testid="stMetric"] {background:#1b2421;padding:18px;border-radius:12px;border-top:3px solid #b6ef48} a {color:#b6ef48}</style>""",unsafe_allow_html=True)
 st.caption('GRENADE / CANADA · SEARCH INTELLIGENCE')
 st.title('Find the visibility. Follow the evidence.')
 st.caption('DeepSeek result order · Canadian query intent · GEO diagnostic heuristics')
-store=Store(os.getenv('AUDIT_DB','data/audits.sqlite'))
+store=Store(project_path(os.getenv('AUDIT_DB','data/audits.sqlite')))
 queries=load_queries(ROOT/'config/queries.csv')
 brands=json.loads((ROOT/'config/brands.json').read_text());domains=json.loads((ROOT/'config/domains.json').read_text())
 page=st.sidebar.radio('Workspace',['Executive Overview','Keyword Explorer','Competitor Intelligence','Technical & GEO Audit','Action Plan'])
+try:
+    contract_path=Path(os.getenv('API_CONTRACT','config/api_contract.json'))
+    if not contract_path.is_absolute():contract_path=ROOT/contract_path
+    contract=json.loads(contract_path.read_text())
+    contract_ready=bool(contract.get('verified') and contract.get('documentation_sha256') and contract.get('verified_at'))
+    setup_error=None
+except (ValueError,OSError) as exc:
+    contract={};contract_ready=False
+    setup_error='Cannot load the API configuration. Reinstall the latest application files.'
+key_present=bool(os.getenv('DEEPSEEK_API_KEY','').strip())
+with st.sidebar.expander('Connection',expanded=True):
+    if st.button('Check DeepSeek connection'):
+        with st.spinner('Checking DeepSeek credentials…'):
+            st.session_state['connection_check']=check_key()
+    checked=st.session_state.get('connection_check')
+    if checked:
+        (st.success if checked['authenticated'] else st.error)(checked['message'])
+    if not contract_ready:
+        st.warning(setup_error or 'Search/Fetch is not configured in this build. Your API key can be valid while search is unavailable. Updating a verification flag will not supply the missing integration.')
+    elif not key_present:
+        st.info('Add your key to .env and restart Streamlit, then check the connection.')
+    else:
+        st.caption('Search/Fetch configuration is installed. Start the 10-query audit to test Search/Fetch access for your account.')
+    if st.button('Test Search & Fetch',disabled=not (contract_ready and key_present)):
+        with st.spinner('Testing one search and one fetched page…'):
+            probe_manifest,probe_fingerprint=probe_plan(ROOT/'config/queries.csv',contract,brands,domains)
+            probe_run,probe_error=run_audit(store,probe_manifest,probe_fingerprint,refresh=True)
+            outcome=probe_result(store,probe_run)
+        if probe_error:st.error(probe_error)
+        elif outcome['search_ok'] and outcome['fetch_ok']:st.success(outcome['message'])
+        else:st.warning(outcome['message'])
+    st.caption('Service test uses one real query and up to one Fetch. At published rates the maximum successful-call cost is $0.0015; failed retries are not billable.')
 with st.sidebar.expander('Run an audit'):
+
     limit=st.number_input('Query limit',1,len(queries),10)
     fetch_limit=st.number_input('Maximum Fetch calls',0,100,5)
     refresh=st.checkbox('Fresh weekly measurement (bypass cache)',value=True)
-    st.caption('Prices unknown unless configured. Retries count toward MAX_REQUESTS. Technical HTTP calls are separate.')
-    if st.button('Start audit',type='primary'):
+    st.caption('Published rate: $0.00075 per successful non-empty Search or Fetch request. Failures and empty results are not billable. Cache hits make no API call. Technical HTTP is separate; actual billing can differ during provider free periods.')
+    if st.button('Start audit',type='primary',disabled=not (contract_ready and key_present)):
         try:
-            contract=json.loads(Path(os.getenv('API_CONTRACT',str(ROOT/'config/api_contract.json'))).read_text())
             manifest,fingerprint=plan(ROOT/'config/queries.csv',contract,brands,domains,limit,20,fetch_limit,5)
             with st.spinner('Collecting evidence…'):
                 rid,error=run_audit(store,manifest,fingerprint,refresh)
@@ -34,7 +66,7 @@ with st.sidebar.expander('Run an audit'):
         except (ValueError,OSError) as e:st.error(str(e))
 runs=store.rows('SELECT * FROM runs ORDER BY id DESC')
 if not runs:
-    st.info('No audit data yet. Visibility is not measured. Configure the verified API contract and credentials, then start the 10-query audit.')
+    st.info('No audit data yet. Visibility is not measured. Connection and service status appear in the sidebar.')
     a,b,c=st.columns(3)
     a.metric('Queries ready',len(queries));b.metric('Non-Grenade queries',sum(not q['branded'] for q in queries));c.metric('Successful live searches','Not measured')
     st.subheader(page)
@@ -53,10 +85,12 @@ manifest=json.loads(record['manifest']);brands=manifest['brands'];domains=manife
 q,r=frames(store,run);official_validated=any(x.get('brand')=='Grenade' and x.get('evidence_url') and x.get('evidence_note') for x in domains.get('official',[]))
 metrics=visibility(q,r,official_validated=official_validated)
 st.caption(f'Run #{run} · {record["status"]} · fingerprint {record["fingerprint"][:12]} · timestamps stored in UTC')
+if manifest.get('purpose')=='connection_probe':
+    st.info('This is a one-query service connectivity test, not the acquisition baseline. Run the 10-query audit next.')
 st.warning('Coverage describes this API and query set. It is not Google rank, traffic, search volume, or direct AI recommendation visibility.')
 if not metrics['successful_queries']:
     st.info('This run has no successful searches. No visibility conclusions are supported.')
-    st.dataframe(q if not q.empty else pd.DataFrame([{'status':record['status'],'next_step':'Verify documented API contract and configure API key'}]),use_container_width=True)
+    st.dataframe(q if not q.empty else pd.DataFrame([{'status':record['status'],'next_step':'Check the Connection panel for credential and service readiness'}]),use_container_width=True)
     st.stop()
 if not official_validated:st.info('Official-domain ownership scope is unverified. Official coverage is not measured; third-party mentions can still be analyzed.')
 ops=gaps(store,run,brands,domains)
@@ -86,7 +120,7 @@ if page=='Executive Overview':
     else:st.caption('No comparable baseline yet. Weekly runs must use the same query set and parameters.')
     req=pd.DataFrame(store.rows('SELECT * FROM requests WHERE run_id=?',(run,)))
     if not req.empty:
-        st.write(f'API attempts: {len(req)} · Cost estimate: '+(f"{req.cost.sum():.4f} (configured currency)" if req.cost.notna().all() else 'Unknown: pricing not fully configured'))
+        st.write(f'API attempts: {len(req)} · Cost estimate: '+(f"{req.cost.sum():.4f} USD at configured list rate" if req.cost.notna().all() else 'Unknown: response did not establish billability'))
     st.caption('Cached result observation times appear in Keyword Explorer; cache hits are not fresh measurements.')
 elif page=='Keyword Explorer':
     categories=st.multiselect('Intent',sorted(q.category.unique()),default=sorted(q.category.unique()))

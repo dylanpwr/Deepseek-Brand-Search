@@ -28,3 +28,48 @@ def test_dashboard_all_five_with_synthetic_test_data(tmp_path,monkeypatch):
     for page in ['Executive Overview','Keyword Explorer','Competitor Intelligence','Technical & GEO Audit','Action Plan']:
         app.sidebar.radio[0].set_value(page).run(timeout=30)
         assert not app.exception,page
+
+
+def test_connection_button_shows_key_result(tmp_path,monkeypatch):
+    monkeypatch.setenv('AUDIT_DB',str(tmp_path/'connection.sqlite'))
+    monkeypatch.setattr('grenade.connection.check_key',lambda:{'authenticated':True,'message':'Test key accepted; Search untested.'})
+    app=AppTest.from_file(str(ROOT/'app.py')).run(timeout=30)
+    next(button for button in app.button if button.label=='Check DeepSeek connection').click().run(timeout=30)
+    assert not app.exception
+    assert any('Test key accepted' in item.value for item in app.success)
+
+
+def test_unconfigured_service_disables_audit_even_with_key(tmp_path,monkeypatch):
+    monkeypatch.setenv('AUDIT_DB',str(tmp_path/'blocked.sqlite'))
+    monkeypatch.setenv('DEEPSEEK_API_KEY','synthetic-test-key')
+    missing=tmp_path/'unconfigured.json'
+    missing.write_text('{"verified":false}')
+    monkeypatch.setenv('API_CONTRACT',str(missing))
+    app=AppTest.from_file(str(ROOT/'app.py')).run(timeout=30)
+    assert not app.exception
+    assert next(button for button in app.button if button.label=='Start audit').disabled
+    assert any('Search/Fetch is not configured' in item.value for item in app.warning)
+    import sqlite3
+    with sqlite3.connect(tmp_path/'blocked.sqlite') as db:
+        assert db.execute('SELECT COUNT(*) FROM runs').fetchone()[0]==0
+
+
+def test_service_test_button_checks_both_apis(tmp_path,monkeypatch):
+    monkeypatch.setenv('AUDIT_DB',str(tmp_path/'probe.sqlite'))
+    monkeypatch.setenv('DEEPSEEK_API_KEY','synthetic-test-key')
+    calls=[]
+    class FakeClient:
+        def __init__(self,*a,**k):pass
+        def search(self,*a):
+            calls.append('search')
+            return ([{'title':'Grenade bars test','url':'https://example.test/bar'}],{'synthetic':True},'2026-01-01T00:00:00+00:00',False)
+        def fetch(self,*a):
+            calls.append('fetch')
+            return ('# Test bar',{'title':'Test bar'},'2026-01-01T00:00:00+00:00',False)
+    monkeypatch.setattr('grenade.runner.Client',FakeClient)
+    app=AppTest.from_file(str(ROOT/'app.py')).run(timeout=30)
+    next(button for button in app.button if button.label=='Test Search & Fetch').click().run(timeout=30)
+    assert not app.exception
+    assert calls==['search','fetch']
+    assert any('Search and Fetch both succeeded' in item.value for item in app.success)
+    assert any('not the acquisition baseline' in item.value for item in app.info)

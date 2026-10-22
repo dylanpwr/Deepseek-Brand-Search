@@ -25,10 +25,14 @@ class Store:
         CREATE TABLE IF NOT EXISTS pages(run_id INTEGER, url TEXT, observed_at TEXT, kind TEXT,
           status TEXT, evidence TEXT, raw TEXT, PRIMARY KEY(run_id,url,kind));
         CREATE TABLE IF NOT EXISTS requests(id INTEGER PRIMARY KEY, run_id INTEGER, kind TEXT,
-          timestamp TEXT, status INTEGER, cost REAL, error TEXT);
+          timestamp TEXT, status INTEGER, cost REAL, error TEXT, raw TEXT, billable INTEGER);
         CREATE TABLE IF NOT EXISTS cache(key TEXT PRIMARY KEY, timestamp TEXT, raw TEXT);
         CREATE TABLE IF NOT EXISTS imports(id INTEGER PRIMARY KEY, source TEXT, timestamp TEXT, raw TEXT);
         """)
+        # Preserve existing audit databases when upgrading the request ledger.
+        columns={row[1] for row in self.db.execute('PRAGMA table_info(requests)')}
+        for name,kind in [('raw','TEXT'),('billable','INTEGER')]:
+            if name not in columns:self.db.execute(f'ALTER TABLE requests ADD COLUMN {name} {kind}')
         self.db.commit()
     def execute(self, sql, args=()):
         cur=self.db.execute(sql,args);self.db.commit();return cur

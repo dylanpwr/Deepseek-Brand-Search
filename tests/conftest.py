@@ -19,3 +19,10 @@ def contract():
 def query():
     return {'id':'q1','query':'best protein bars Canada','category':'Category discovery','branded':False,
       'language':'en','priority':1,'purchase_intent':3,'canada_relevance':5}
+
+
+@pytest.fixture
+def deepseek_contract():
+    import json
+    from grenade.runner import ROOT
+    return json.loads((ROOT/'config/api_contract.json').read_text())
