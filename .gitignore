@@ -1,0 +1,17 @@
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+# Runtime and generated audit data
+data/
+*.sqlite*
+reports/run-*.json
+reports/queries-*.csv
+reports/results-*.csv
+reports/executive-*.md
+reports/dashboard-preview.html
+# Python artifacts
+.venv/
+__pycache__/
+.pytest_cache/
