@@ -1,0 +1,27 @@
+{
+  "Grenade": [
+    "\\bgrenade\\b"
+  ],
+  "Barebells": [
+    "\\bbarebells\\b"
+  ],
+  "Quest": [
+    "\\bquest(?:\\s+nutrition)?\\b"
+  ],
+  "ONE": [
+    "\\bONE\\s+(?:protein\\s+)?bars?\\b",
+    "\\bONE\\s+Brands\\b"
+  ],
+  "Pure Protein": [
+    "\\bpure protein\\b"
+  ],
+  "Built": [
+    "\\bbuilt\\s+(?:puff|bar)s?\\b"
+  ],
+  "RXBAR": [
+    "\\brx\\s?bar\\b"
+  ],
+  "Kirkland Signature": [
+    "\\bkirkland(?: signature)?\\b"
+  ]
+}

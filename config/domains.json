@@ -1,0 +1,20 @@
+{
+  "official": [],
+  "candidates": [
+    "https://www.grenade.com/"
+  ],
+  "instructions": "Candidate is a discovery seed, NOT validated ownership. Add official entries only after reviewing a brand-controlled ownership source: {domain, brand, evidence_url, evidence_note}. Keep exact host or parent domain; subdomains inherit.",
+  "retailers": [
+    "amazon.ca",
+    "walmart.ca",
+    "costco.ca",
+    "well.ca",
+    "supplementsource.ca",
+    "popeyescanada.com",
+    "loblaws.ca",
+    "metro.ca",
+    "sobeys.com"
+  ],
+  "distribution": [],
+  "distribution_instructions": "Optional confirmed Canadian availability: {retailer, brand, url, verified_at, note}. A search mention alone does not establish stock."
+}

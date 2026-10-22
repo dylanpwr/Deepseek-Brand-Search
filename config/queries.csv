@@ -1,0 +1,116 @@
+id,query,category,priority,language,branded,purchase_intent,canada_relevance
+q001,best protein bars Canada,Category discovery,1,en,False,3,5
+q002,best tasting protein bars,Category discovery,1,en,False,3,3
+q003,low sugar protein bars Canada,Category discovery,1,en,False,3,5
+q004,high protein snacks Canada,Category discovery,1,en,False,3,5
+q005,protein bars for muscle gain,Category discovery,1,en,False,3,3
+q006,protein bars for weight loss,Category discovery,1,en,False,3,3
+q007,chocolate protein bars,Category discovery,1,en,False,3,3
+q008,best high protein bars Canada,Category discovery,2,en,False,3,5
+q009,best protein bars for beginners Canada,Category discovery,2,en,False,3,5
+q010,protein bars with 20 grams protein Canada,Category discovery,2,en,False,3,5
+q011,best low carb protein bars Canada,Category discovery,2,en,False,3,5
+q012,protein bars without sugar alcohols Canada,Category discovery,2,en,False,3,5
+q013,protein bars without artificial sweeteners Canada,Category discovery,2,en,False,3,5
+q014,best gluten free protein bars Canada,Category discovery,2,en,False,3,5
+q015,best protein bars for gym Canada,Category discovery,2,en,False,3,5
+q016,best crunchy protein bars,Category discovery,2,en,False,3,3
+q017,best soft protein bars,Category discovery,2,en,False,3,3
+q018,best chocolate coated protein bars,Category discovery,2,en,False,3,3
+q019,protein bars for post workout Canada,Category discovery,2,en,False,3,5
+q020,protein bars for pre workout Canada,Category discovery,2,en,False,3,5
+q021,high protein office snacks Canada,Category discovery,2,en,False,3,5
+q022,protein bars for travel Canada,Category discovery,2,en,False,3,5
+q023,best protein snack bars for hiking Canada,Category discovery,2,en,False,3,5
+q024,low calorie protein bars Canada,Category discovery,2,en,False,3,5
+q025,protein bars under 200 calories Canada,Category discovery,2,en,False,3,5
+q026,protein bars with low saturated fat Canada,Category discovery,2,en,False,3,5
+q027,protein bars with fibre Canada,Category discovery,2,en,False,3,5
+q028,best protein bars for busy adults Canada,Category discovery,2,en,False,3,5
+q029,best value protein bars Canada,Category discovery,2,en,False,3,5
+q030,protein bars multipack Canada,Category discovery,2,en,False,3,5
+q031,peanut butter protein bars Canada,Category discovery,2,en,False,3,5
+q032,cookies and cream protein bars Canada,Category discovery,2,en,False,3,5
+q033,caramel protein bars Canada,Category discovery,2,en,False,3,5
+q034,white chocolate protein bars Canada,Category discovery,2,en,False,3,5
+q035,protein bars nutrition label comparison Canada,Category discovery,2,en,False,3,5
+q036,Grenade vs Barebells,Product comparison,1,en,True,4,3
+q037,Grenade vs Quest,Product comparison,1,en,True,4,3
+q038,best protein bars Grenade Barebells Quest,Product comparison,1,en,True,4,3
+q039,best protein bars for taste,Product comparison,1,en,False,4,3
+q040,low sugar protein bar comparison,Product comparison,1,en,False,4,3
+q041,Barebells vs Quest Canada,Product comparison,1,en,False,4,5
+q042,protein bar taste test Canada,Product comparison,1,en,False,4,5
+q043,best chocolate protein bar comparison,Product comparison,2,en,False,4,3
+q044,protein bar price per gram of protein Canada,Product comparison,2,en,False,4,5
+q045,whey protein bars vs plant protein bars,Product comparison,2,en,False,4,3
+q046,protein bars vs protein shakes for convenience,Product comparison,2,en,False,4,3
+q047,protein bars sugar alcohol comparison,Product comparison,2,en,False,4,3
+q048,low carb protein bars taste comparison,Product comparison,2,en,False,4,3
+q049,protein bar ingredient comparison Canada,Product comparison,2,en,False,4,5
+q050,protein bars texture comparison,Product comparison,2,en,False,4,3
+q051,best supermarket protein bars Canada,Product comparison,2,en,False,4,5
+q052,best protein bar value comparison Canada,Product comparison,2,en,False,4,5
+q053,protein bar protein quality comparison,Product comparison,2,en,False,4,3
+q054,Quest vs Pure Protein Canada,Product comparison,2,en,False,4,5
+q055,RXBAR vs Quest Canada,Product comparison,2,en,False,4,5
+q056,buy protein bars Canada,Transactional,1,en,False,5,5
+q057,protein bars online Canada,Transactional,1,en,False,5,5
+q058,protein bars Walmart Canada,Transactional,1,en,False,5,5
+q059,protein bars Costco Canada,Transactional,1,en,False,5,5
+q060,protein bars Amazon Canada,Transactional,1,en,False,5,5
+q061,protein bars sale Canada,Transactional,1,en,False,5,5
+q062,protein bars bulk Canada,Transactional,1,en,False,5,5
+q063,protein bar variety pack Canada,Transactional,1,en,False,5,5
+q064,protein bars delivery Toronto,Transactional,1,en,False,5,5
+q065,protein bars delivery Vancouver,Transactional,1,en,False,5,3
+q066,protein bars delivery Montreal,Transactional,1,en,False,5,5
+q067,protein bars Ottawa,Transactional,1,en,False,5,3
+q068,protein bars Calgary,Transactional,1,en,False,5,3
+q069,protein bars Edmonton,Transactional,1,en,False,5,3
+q070,protein bars Halifax,Transactional,1,en,False,5,3
+q071,protein bars grocery stores Canada,Transactional,1,en,False,5,5
+q072,protein bars Loblaws,Transactional,1,en,False,5,3
+q073,protein bars Metro Canada,Transactional,1,en,False,5,5
+q074,protein bars Sobeys,Transactional,1,en,False,5,3
+q075,protein bars Shoppers Drug Mart,Transactional,1,en,False,5,3
+q076,protein bars Well.ca,Transactional,1,en,False,5,3
+q077,protein bars Popeyes Canada,Transactional,1,en,False,5,5
+q078,low sugar protein bars Walmart Canada,Transactional,1,en,False,5,5
+q079,chocolate protein bars Amazon Canada,Transactional,1,en,False,5,5
+q080,high protein bars Costco Canada,Transactional,1,en,False,5,5
+q081,protein bar subscription Canada,Transactional,1,en,False,5,5
+q082,protein bars case Canada,Transactional,1,en,False,5,5
+q083,protein bars near me Toronto,Transactional,1,en,False,5,5
+q084,best price protein bars Canada,Transactional,1,en,False,5,5
+q085,cookies cream protein bars Canada buy,Transactional,1,en,False,5,5
+q086,Grenade protein bars Canada,Brand discovery,1,en,True,3,5
+q087,Grenade Oreo protein bar,Brand discovery,1,en,True,3,3
+q088,Grenade protein bar reviews,Brand discovery,1,en,True,3,3
+q089,where to buy Grenade protein bars,Brand discovery,1,en,True,3,3
+q090,Grenade protein bars Walmart Canada,Brand discovery,1,en,True,3,5
+q091,Grenade protein bars Costco Canada,Brand discovery,1,en,True,3,5
+q092,Grenade protein bars Amazon Canada,Brand discovery,1,en,True,3,5
+q093,Grenade protein bar nutrition Canada,Brand discovery,2,en,True,3,5
+q094,Grenade protein bar ingredients Canada,Brand discovery,2,en,True,3,5
+q095,Grenade protein bars French label,Brand discovery,2,en,True,3,3
+q096,meilleures barres protéinées Canada,French-language discovery,1,fr,False,3,5
+q097,barres protéinées faibles en sucre,French-language discovery,1,fr,False,3,3
+q098,acheter barres protéinées Québec,French-language discovery,1,fr,False,3,5
+q099,meilleures barres protéinées au chocolat,French-language discovery,1,fr,False,3,3
+q100,barres protéinées en ligne Canada,French-language discovery,1,fr,False,3,5
+q101,barres protéinées Walmart Canada,French-language discovery,1,fr,False,3,5
+q102,barres protéinées Costco Canada,French-language discovery,1,fr,False,3,5
+q103,barres protéinées Amazon Canada,French-language discovery,2,fr,False,3,5
+q104,comparatif barres protéinées Québec,French-language discovery,2,fr,False,3,5
+q105,barres protéinées riches en protéines,French-language discovery,2,fr,False,3,3
+q106,collations riches en protéines Québec,French-language discovery,2,fr,False,3,5
+q107,barres protéinées Montréal,French-language discovery,2,fr,False,3,5
+q108,barres protéinées sans gluten Canada,French-language discovery,2,fr,False,3,5
+q109,barres protéinées goût chocolat avis,French-language discovery,2,fr,False,3,3
+q110,barres protéinées prix Québec,French-language discovery,2,fr,False,3,5
+q111,barres protéinées livraison Québec,French-language discovery,2,fr,False,3,5
+q112,barres protéinées ingrédients Canada,French-language discovery,2,fr,False,3,5
+q113,meilleures barres protéinées goût,French-language discovery,2,fr,False,3,3
+q114,barres protéinées après entraînement,French-language discovery,2,fr,False,3,3
+q115,barres protéinées faibles en glucides Canada,French-language discovery,2,fr,False,3,5
