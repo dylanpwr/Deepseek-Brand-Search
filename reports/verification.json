@@ -1,9 +1,14 @@
 {
-  "tests": 25,
-  "tests_passed": 25,
+  "tests": 67,
+  "tests_passed": 67,
   "streamlit_health": "ok",
   "live_searches": 0,
-  "api_contract_verified": false,
-  "credential_configured": false,
-  "remaining_blocker": "Official documentation access and verified provider contract; credentials needed for live audit"
+  "live_fetches": 0,
+  "api_contract_verified": true,
+  "api_contract_source": "User-supplied copy of official guide",
+  "documentation_sha256": "364edb84331d68e55abc52627f5c864b734c16164b908baf8df1804c44ac340e",
+  "credential_configured_in_build_environment": false,
+  "live_validation": "Not run here: private key remains in user local .env. Dashboard Test Search & Fetch and CLI probe test both services.",
+  "published_cost_per_billable_request_usd": 0.00075,
+  "estimated_10_query_5_fetch_list_price_usd": 0.01125
 }
