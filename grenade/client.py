@@ -1,0 +1,117 @@
+"""Documentation-gated transport. No speculative DeepSeek endpoints."""
+import hashlib, json, os, time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
+from urllib.parse import urlparse
+import requests
+from .storage import now
+
+class APIError(RuntimeError): pass
+
+def at(value,path):
+    if path in ('',None): return value
+    for key in path.split('.'):
+        value=value[int(key)] if isinstance(value,list) else value[key]
+    return value
+
+class Client:
+    def __init__(self,store,run,contract,key=None,session=None,sleep=time.sleep):
+        self.store,self.run,self.contract=store,run,contract
+        self.key=key or os.getenv('DEEPSEEK_API_KEY')
+        self.session=session or requests.Session();self.sleep=sleep
+        self.count=0;self.cache_hits=0;self.last=0
+        self.budget=int(os.getenv('MAX_REQUESTS','100'))
+        self.timeout=float(os.getenv('REQUEST_TIMEOUT','30'))
+        self.ttl=float(os.getenv('CACHE_TTL_HOURS','24'))*3600
+        self.validate()
+        rpm=min(float(os.getenv('REQUESTS_PER_MINUTE','10')),float(contract['max_rpm']))
+        if rpm<=0: raise APIError('Request rate must be positive')
+        self.interval=60/rpm
+    def validate(self):
+        c=self.contract
+        if not c.get('verified') or not c.get('verified_at') or not c.get('documentation_sha256'):
+            raise APIError('Official Search/Fetch API contract is unverified. Read README API verification before live use.')
+        if not self.key: raise APIError('DEEPSEEK_API_KEY is not configured')
+        if not c.get('auth',{}).get('header') or c['auth'].get('prefix') is None:
+            raise APIError('Documented authentication mapping missing')
+        for kind in ('search','fetch'):
+            spec=c.get(kind,{})
+            if urlparse(spec.get('url') or '').scheme!='https' or spec.get('method') not in ('GET','POST'):
+                raise APIError('Documented HTTPS endpoint and method required for '+kind)
+        if not c.get('max_results') or not c.get('max_rpm'): raise APIError('Documented limits missing')
+        if not c['search'].get('query_field') or not c['search'].get('limit_field') or c['search'].get('results_path') is None:
+            raise APIError('Documented search schema missing')
+        if not {'url','title'}.issubset(c['search'].get('fields',{})):
+            raise APIError('Documented result field mapping missing')
+        if not c['fetch'].get('url_field') or c['fetch'].get('content_path') is None:
+            raise APIError('Documented fetch schema missing')
+    def call(self,kind,variable,refresh=False):
+        spec=self.contract[kind];payload=dict(spec.get('payload',{}));payload.update(variable)
+        cache_key=hashlib.sha256(json.dumps([kind,spec,payload],sort_keys=True).encode()).hexdigest()
+        found=self.store.rows('SELECT * FROM cache WHERE key=?',(cache_key,))
+        if found and not refresh and (datetime.now(timezone.utc)-datetime.fromisoformat(found[0]['timestamp'])).total_seconds()<self.ttl:
+            self.cache_hits+=1
+            return json.loads(found[0]['raw']),found[0]['timestamp'],True
+        headers={self.contract['auth']['header']:self.contract['auth']['prefix']+self.key}
+        last_error='Request failed'
+        for attempt in range(3):
+            if self.count>=self.budget: raise APIError('Request budget exhausted (includes retries)')
+            self.sleep(max(0,self.interval-(time.monotonic()-self.last)))
+            self.last=time.monotonic();self.count+=1
+            status=None;retry=False;wait=min(2**attempt,30);data=None
+            try:
+                kw={'params':payload} if spec['method']=='GET' else {'json':payload}
+                response=self.session.request(spec['method'],spec['url'],headers=headers,timeout=self.timeout,allow_redirects=False,**kw)
+                status=response.status_code
+                if 200<=status<300:
+                    data=response.json()
+                else:
+                    last_error=f'{kind} HTTP {status}'
+                    retry=status in self.contract.get('retry_statuses',[])
+                    retry_header=self.contract.get('retry_after_header')
+                    value=response.headers.get(retry_header) if retry_header else None
+                    if value:
+                        try: wait=max(wait,float(value))
+                        except ValueError:
+                            try: wait=max(wait,(parsedate_to_datetime(value)-datetime.now(timezone.utc)).total_seconds())
+                            except (ValueError,TypeError): pass
+                    if wait>60:
+                        retry=False;last_error+='; server retry delay exceeds local 60-second ceiling; retry later'
+            except (requests.RequestException,ValueError):
+                last_error=f'{kind} network/JSON failure';retry=True
+            price=os.getenv(kind.upper()+'_COST_PER_REQUEST','')
+            self.store.execute('INSERT INTO requests(run_id,kind,timestamp,status,cost,error) VALUES(?,?,?,?,?,?)',
+                (self.run,kind,now(),status,float(price) if price else None,None if data is not None else last_error))
+            if data is not None:
+                stamp=now();raw=json.dumps(data,ensure_ascii=False)
+                self.store.execute('INSERT OR REPLACE INTO cache VALUES(?,?,?)',(cache_key,stamp,raw))
+                return data,stamp,False
+            if not retry or attempt==2: break
+            self.sleep(wait)
+        raise APIError(last_error)
+    def search(self,query,limit=20,refresh=False):
+        spec=self.contract['search']
+        raw,stamp,cached=self.call('search',{spec['query_field']:query,spec['limit_field']:min(limit,20,self.contract['max_results'])},refresh)
+        try:
+            results=at(raw,spec['results_path'])
+            if not isinstance(results,list): raise ValueError()
+            mapped=[]
+            for r in results[:limit]:
+                row={}
+                for name,path in spec['fields'].items():
+                    try: row[name]=at(r,path)
+                    except (KeyError,IndexError,TypeError):
+                        if name in ('url','title'): raise
+                        row[name]=None
+                if not isinstance(row.get('url'),str) or not isinstance(row.get('title'),str): raise ValueError()
+                mapped.append(row)
+            return mapped,raw,stamp,cached
+        except (KeyError,TypeError,ValueError,IndexError) as e:
+            raise APIError('Search response schema mismatch; raw response retained in cache') from e
+    def fetch(self,url,refresh=False):
+        spec=self.contract['fetch'];raw,stamp,cached=self.call('fetch',{spec['url_field']:url},refresh)
+        try:
+            content=at(raw,spec['content_path'])
+            if not isinstance(content,str): raise ValueError()
+            return content,raw,stamp,cached
+        except (KeyError,TypeError,IndexError,ValueError) as e: raise APIError('Fetch response schema mismatch') from e

@@ -1,0 +1,9 @@
+{
+  "tests": 25,
+  "tests_passed": 25,
+  "streamlit_health": "ok",
+  "live_searches": 0,
+  "api_contract_verified": false,
+  "credential_configured": false,
+  "remaining_blocker": "Official documentation access and verified provider contract; credentials needed for live audit"
+}

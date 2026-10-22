@@ -1,0 +1,31 @@
+{
+  "verified": false,
+  "documentation_url": "https://api-docs.deepseek.com/guides/search/",
+  "verified_at": null,
+  "documentation_sha256": null,
+  "note": "BLOCKED: documentation unavailable in build environment. Populate solely from official Search AND Fetch documentation. No endpoints or schemas are assumed.",
+  "auth": {
+    "header": null,
+    "prefix": null
+  },
+  "search": {
+    "url": null,
+    "method": null,
+    "payload": {},
+    "query_field": null,
+    "limit_field": null,
+    "results_path": null,
+    "fields": {}
+  },
+  "fetch": {
+    "url": null,
+    "method": null,
+    "payload": {},
+    "url_field": null,
+    "content_path": null
+  },
+  "max_results": null,
+  "max_rpm": null,
+  "retry_statuses": [],
+  "retry_after_header": null
+}
